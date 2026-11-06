@@ -1,4 +1,4 @@
-# Calculadora de Faturamento – BEP Energia
+# Calculadora - Preço atualizado com o IPCA
 
 Calculadora online para o cliente conferir o valor faturado: parte do **preço contratado sem tributos**, aplica a **correção do IPCA desde a data-base** e inclui **PIS/Cofins e ICMS "por dentro"**.
 
