@@ -190,7 +190,7 @@
           <div class="formula" id="formula">1) Preço + PIS/Cofins = Preço do contrato ÷ (1 − PIS − Cofins)
 
 2) Fator IPCA = (1 + IPCA mês 1) × (1 + IPCA mês 2) × …
-   da data-base até o mês do reajuste vigente (inclusive)
+   da data-base até o mês anterior ao reajuste vigente
 
 3) Preço + PIS/Cofins + IPCA = (1) × Fator IPCA
 
@@ -281,7 +281,7 @@ function msg(tipo, texto){ const el = $("ipcaMsg"); el.className = "msg " + tipo
 const nReaj = (ent, r) => Math.round((ym(r).y*12 + ym(r).m - ym(ent).y*12 - ym(ent).m)/12) + 1;
 
 // Reajustes: 1º reajuste + 12k meses. Retorna o maior reajuste <= mês de referência.
-// O IPCA vai da data-base até o mês do reajuste (inclusive).
+// O IPCA vai da data-base até o mês anterior ao reajuste.
 function ultimoAniversario(primeiro, mf){
   if (!primeiro || !mf || mf < primeiro) return null;
   let a = primeiro;
@@ -303,9 +303,9 @@ async function atualizarIPCA(){
   msg("ok", "Buscando IPCA…");
   try{
     let aviso = "";
-    // Reajuste só vale quando o IPCA do próprio mês do reajuste já foi divulgado
+    // Reajuste só vale quando o IPCA do mês anterior a ele já foi divulgado
     while (true){
-      const fim = aniv;
+      const fim = addMonths(aniv, -1); // até o mês anterior ao reajuste
       if (fim < db){ ipcaFator = 1; break; }
       const lista = await obterIPCA(db, fim);
       if (seq !== ipcaSeq) return;

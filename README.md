@@ -7,7 +7,7 @@ Calculadora online para o cliente conferir o valor faturado: parte do **preço c
 Mesma sequência e arredondamento da memória de cálculo do reajuste:
 
 1. **Preço + PIS/Cofins** = Preço do contrato ÷ (1 − PIS − Cofins)
-2. **Fator IPCA** = produto de (1 + IPCA mensal), do mês da data-base até o mês do reajuste vigente (inclusive)
+2. **Fator IPCA** = produto de (1 + IPCA mensal), do mês da data-base até o mês anterior ao reajuste vigente
    - Os reajustes ocorrem no mês do 1º reajuste e, depois, a cada 12 meses.
    - O reajuste vigente é o último que seja igual ou anterior ao mês de referência e cujo IPCA já foi divulgado.
 3. **Preço + PIS/Cofins + IPCA** = (1) × Fator IPCA
