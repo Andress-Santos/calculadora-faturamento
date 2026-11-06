@@ -281,7 +281,7 @@ function ultimoReajuste(entrada, mf){
 function sugerirPeriodo(){
   const db = $("dataBase").value, mf = $("mesFat").value, ent = $("entrada").value;
   const box = $("reajInfo");
-  if (db && ipcaAuto.ini) $("ipcaIni").value = addMonths(db, 1);
+  if (db && ipcaAuto.ini) $("ipcaIni").value = db; // inclui o mês da data-base
   const ult = ultimoReajuste(ent, mf);
   if (ent && mf && !ult){
     box.className = "msg warn"; box.textContent = "O mês de faturamento é anterior ao início do suprimento.";
