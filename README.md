@@ -5,7 +5,7 @@ Calculadora online para o cliente conferir o valor faturado: parte do **preço c
 ## Como o cálculo é feito
 
 1. **Preço reajustado** = Preço contratado × Fator IPCA
-   (Fator IPCA = produto de (1 + IPCA mensal), do mês seguinte à data-base até o mês anterior ao último reajuste)
+   (Fator IPCA = produto de (1 + IPCA mensal), do mês da data-base até o mês anterior ao último reajuste)
    - O 1º reajuste ocorre no mês de início do suprimento; os seguintes, a cada 12 meses (aniversário da entrada).
 2. **Preço c/ PIS/Cofins** = Preço reajustado ÷ (1 − PIS − Cofins)
 3. **Preço final** = Preço c/ PIS/Cofins ÷ (1 − ICMS)
