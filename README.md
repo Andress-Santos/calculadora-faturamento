@@ -4,12 +4,17 @@ Calculadora online para o cliente conferir o valor faturado: parte do **preço c
 
 ## Como o cálculo é feito
 
-1. **Preço reajustado** = Preço contratado × Fator IPCA
-   (Fator IPCA = produto de (1 + IPCA mensal), do mês da data-base até o mês anterior ao último reajuste)
-   - O 1º reajuste ocorre no mês de início do suprimento; os seguintes, a cada 12 meses (aniversário da entrada).
-2. **Preço c/ PIS/Cofins** = Preço reajustado ÷ (1 − PIS − Cofins)
-3. **Preço final** = Preço c/ PIS/Cofins ÷ (1 − ICMS)
-4. **Total da fatura** = Preço final × Volume (MWh)
+Mesma sequência e arredondamento da memória de cálculo do reajuste:
+
+1. **Preço + PIS/Cofins** = Preço do contrato ÷ (1 − PIS − Cofins)
+2. **Fator IPCA** = produto de (1 + IPCA mensal), do mês da data-base até o mês anterior ao reajuste vigente
+   - O 1º reajuste ocorre no mês de início do suprimento; os seguintes, a cada 12 meses.
+   - Um reajuste só é aplicado depois que o IPCA do mês anterior a ele foi divulgado.
+3. **Preço + PIS/Cofins + IPCA** = (1) × Fator IPCA
+4. **Preço vigente** = (3) ÷ (1 − ICMS)
+5. **Total da fatura** = Preço vigente × Volume (MWh)
+
+Cada etapa é arredondada para 2 casas; o fator IPCA, para 6 casas. PIS (1,65%) e Cofins (7,60%) são fixos; só o ICMS é editável.
 
 O IPCA vem automaticamente da API do Banco Central (série SGS 433). Se ela não responder, a calculadora usa a do IBGE (SIDRA, tabela 1737). Se o IPCA acumulado for negativo, o preço é mantido (nunca há deflação).
 

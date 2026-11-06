@@ -36,6 +36,12 @@
   .suffix{position:relative}
   .suffix span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.85rem;pointer-events:none}
   .suffix input{padding-right:64px}
+  .readonly{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .readonly div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .readonly span{display:block;font-size:.78rem;color:var(--muted)}
+  .readonly b{color:var(--strong);font-size:1rem}
+  @media (max-width:480px){.readonly{grid-template-columns:1fr}}
+  input:disabled{color:var(--muted);background:var(--bg);cursor:not-allowed}
   .check{display:flex;gap:8px;align-items:center;font-weight:500;margin-top:12px}
   .check input{width:auto}
   .pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--brand-2);color:var(--brand);font-size:.8rem;font-weight:600}
@@ -100,34 +106,18 @@
             <input id="dataBase" type="month">
           </div>
           <div>
-            <label for="volume">Volume faturado</label>
-            <div class="suffix"><input id="volume" inputmode="decimal" placeholder="ex.: 1.000"><span>MWh</span></div>
+            <label for="entrada">Início do suprimento</label>
+            <input id="entrada" type="month">
           </div>
         </div>
       </div>
 
       <div class="card" style="margin-top:20px">
         <h2><span class="step">2</span>Correção pelo IPCA</h2>
-        <div class="row">
-          <div>
-            <label for="entrada">Início do suprimento</label>
-            <input id="entrada" type="month">
-          </div>
-          <div>
-            <label for="mesFat">Mês de faturamento</label>
-            <input id="mesFat" type="month">
-          </div>
-        </div>
-        <div id="reajInfo" class="msg ok hidden"></div>
-        <div class="row">
-          <div>
-            <label for="ipcaIni">IPCA a partir de</label>
-            <input id="ipcaIni" type="month">
-          </div>
-          <div>
-            <label for="ipcaFim">até</label>
-            <input id="ipcaFim" type="month">
-          </div>
+        <div class="readonly">
+          <div><span>IPCA a partir de</span><b id="roIni">—</b></div>
+          <div><span>Reajuste vigente</span><b id="roReaj">—</b></div>
+          <div><span>Próximo reajuste</span><b id="roProx">—</b></div>
         </div>
         <div id="ipcaMsg" class="msg hidden"></div>
         <details id="mesesBox" class="hidden">
@@ -141,15 +131,29 @@
         <div class="row3">
           <div>
             <label for="pis">PIS</label>
-            <div class="suffix"><input id="pis" inputmode="decimal"><span>%</span></div>
+            <div class="suffix"><input id="pis" disabled><span>%</span></div>
           </div>
           <div>
             <label for="cofins">Cofins</label>
-            <div class="suffix"><input id="cofins" inputmode="decimal"><span>%</span></div>
+            <div class="suffix"><input id="cofins" disabled><span>%</span></div>
           </div>
           <div>
             <label for="icms">ICMS</label>
             <div class="suffix"><input id="icms" inputmode="decimal"><span>%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2><span class="step">4</span>Simulação da nota fiscal</h2>
+        <div class="row">
+          <div>
+            <label for="mesFat">Mês de faturamento</label>
+            <input id="mesFat" type="month">
+          </div>
+          <div>
+            <label for="volume">Volume faturado</label>
+            <div class="suffix"><input id="volume" inputmode="decimal" placeholder="ex.: 1.000"><span>MWh</span></div>
           </div>
         </div>
       </div>
@@ -163,19 +167,19 @@
         <p class="sub" id="rTotalLinha">Informe o preço e a data-base para calcular.</p>
 
         <table id="rTabela">
-          <tr><td>Preço contratado (sem tributos)</td><td id="t1">—</td></tr>
-          <tr class="ind"><td id="tIpcaLbl">Correção IPCA</td><td id="t2">—</td></tr>
-          <tr class="subtotal"><td>Preço reajustado (sem tributos)</td><td id="t3">—</td></tr>
-          <tr class="ind"><td id="tPisLbl">PIS</td><td id="t4">—</td></tr>
-          <tr class="ind"><td id="tCofLbl">Cofins</td><td id="t5">—</td></tr>
-          <tr class="subtotal"><td>Preço com PIS/Cofins</td><td id="t6">—</td></tr>
+          <tr><td>Preço do contrato (sem tributos)</td><td id="t1">—</td></tr>
+          <tr class="ind"><td id="tPisLbl">PIS</td><td id="t2">—</td></tr>
+          <tr class="ind"><td id="tCofLbl">Cofins</td><td id="t3">—</td></tr>
+          <tr class="subtotal"><td>Preço + PIS/Cofins</td><td id="t4">—</td></tr>
+          <tr class="ind"><td id="tIpcaLbl">Correção IPCA</td><td id="t5">—</td></tr>
+          <tr class="subtotal"><td>Preço + PIS/Cofins + IPCA</td><td id="t6">—</td></tr>
           <tr class="ind"><td id="tIcmsLbl">ICMS</td><td id="t7">—</td></tr>
-          <tr class="total"><td>Preço final (R$/MWh)</td><td id="t8">—</td></tr>
+          <tr class="total"><td>Preço vigente com ICMS (R$/MWh)</td><td id="t8">—</td></tr>
         </table>
 
         <table id="rTotais" class="hidden">
           <tr><td>Volume</td><td id="v0">—</td></tr>
-          <tr><td>Valor sem tributos (reajustado)</td><td id="v1">—</td></tr>
+          <tr><td>Energia (sem tributos)</td><td id="v1">—</td></tr>
           <tr class="ind"><td>PIS + Cofins</td><td id="v2">—</td></tr>
           <tr class="ind"><td>ICMS</td><td id="v3">—</td></tr>
           <tr class="total"><td>Valor total da fatura</td><td id="v4">—</td></tr>
@@ -183,14 +187,18 @@
 
         <details>
           <summary>Como o cálculo é feito</summary>
-          <div class="formula" id="formula">1) Preço reajustado = Preço contratado × Fator IPCA
-   Fator IPCA = (1 + IPCA mês 1) × (1 + IPCA mês 2) × …
+          <div class="formula" id="formula">1) Preço + PIS/Cofins = Preço do contrato ÷ (1 − PIS − Cofins)
 
-2) Preço c/ PIS/Cofins = Preço reajustado ÷ (1 − PIS − Cofins)
+2) Fator IPCA = (1 + IPCA mês 1) × (1 + IPCA mês 2) × …
+   da data-base até o mês anterior ao reajuste vigente
 
-3) Preço final = Preço c/ PIS/Cofins ÷ (1 − ICMS)
+3) Preço + PIS/Cofins + IPCA = (1) × Fator IPCA
 
-Total da fatura = Preço final × Volume (MWh)</div>
+4) Preço vigente = (3) ÷ (1 − ICMS)
+
+Valores arredondados a 2 casas em cada etapa
+(fator IPCA com 6 casas).
+Total da fatura = Preço vigente × Volume (MWh)</div>
         </details>
 
         <div class="btns noprint">
@@ -267,67 +275,66 @@ async function obterIPCA(ini, fim){
 }
 
 /* ---------- Estado e cálculo ---------- */
-let ipcaFator = null, ipcaInfo = "", ipcaSeq = 0, ipcaAuto = {ini:true, fim:true};
+let ipcaFator = null, ipcaInfo = "", ipcaSeq = 0;
 
 function msg(tipo, texto){ const el = $("ipcaMsg"); el.className = "msg " + tipo; el.innerHTML = texto; el.classList.toggle("hidden", !texto); }
+const nReaj = (ent, r) => Math.round((ym(r).y*12 + ym(r).m - ym(ent).y*12 - ym(ent).m)/12) + 1;
 
-// Último reajuste aplicável: entrada + 12k meses, o maior que seja <= mês de faturamento
+// Último reajuste: entrada + 12k meses, o maior que seja <= mês de faturamento
 function ultimoReajuste(entrada, mf){
   if (!entrada || !mf || mf < entrada) return null;
   let r = entrada;
   while (addMonths(r, 12) <= mf) r = addMonths(r, 12);
   return r;
 }
-function sugerirPeriodo(){
-  const db = $("dataBase").value, mf = $("mesFat").value, ent = $("entrada").value;
-  const box = $("reajInfo");
-  if (db && ipcaAuto.ini) $("ipcaIni").value = db; // inclui o mês da data-base
-  const ult = ultimoReajuste(ent, mf);
-  if (ent && mf && !ult){
-    box.className = "msg warn"; box.textContent = "O mês de faturamento é anterior ao início do suprimento.";
-  } else if (ult){
-    const n = Math.round((ym(ult).y*12 + ym(ult).m - ym(ent).y*12 - ym(ent).m)/12) + 1;
-    box.className = "msg ok";
-    box.innerHTML = `Reajuste vigente: <b>${labelMes(ult)}</b> (${n}º reajuste). Próximo reajuste: ${labelMes(addMonths(ult, 12))}.`;
-  } else box.className = "msg hidden";
-  if (ipcaAuto.fim){
-    const ref = ult || mf;
-    if (!ref) return;
-    // IPCA de um mês é divulgado por volta do dia 10 do mês seguinte
-    const d = new Date(); const limite = addMonths(hojeYM(), d.getDate() >= 12 ? -1 : -2);
-    let fim = addMonths(ref, -1);
-    if (fim > limite) fim = limite;
-    $("ipcaFim").value = fim;
-  }
-}
 
 async function atualizarIPCA(){
   const seq = ++ipcaSeq;
   $("mesesBox").classList.add("hidden");
-  const ini = $("ipcaIni").value, fim = $("ipcaFim").value;
-  if (!ini || !fim){ ipcaFator = null; msg("", ""); calcular(); return; }
-  if (fim < ini){ ipcaFator = 1; ipcaInfo = "Sem correção (período vazio)"; msg("ok", "Sem correção pelo IPCA neste período."); calcular(); return; }
+  const db = $("dataBase").value, ent = $("entrada").value, mf = $("mesFat").value;
+  $("roIni").textContent = db ? labelMes(db) : "—";
+  $("roReaj").textContent = "—"; $("roProx").textContent = "—";
+  ipcaFator = null; ipcaInfo = "";
+  if (!db || !ent || !mf){ msg("", ""); calcular(); return; }
+  let ult = ultimoReajuste(ent, mf);
+  if (!ult){ msg("warn", "O mês de faturamento é anterior ao início do suprimento."); calcular(); return; }
   msg("ok", "Buscando IPCA…");
   try{
-    const lista = await obterIPCA(ini, fim);
-    if (seq !== ipcaSeq) return;
-    const faltando = lista.filter(x => x.v == null);
-    const validos = lista.filter(x => x.v != null);
-    let f = 1; validos.forEach(x => f *= 1 + x.v/100);
-    const deflacao = f < 1;
-    if (deflacao) f = 1; // nunca aplica deflação
-    ipcaFator = f;
-    const acum = (f - 1) * 100;
-    ipcaInfo = `IPCA ${labelMes(ini)} a ${labelMes(validos.length ? validos[validos.length-1].mes : fim)}: ${pct(acum)}`;
-    let t = deflacao ? `<b>IPCA acumulado negativo:</b> preço mantido, sem deflação.` : `<b>IPCA acumulado: ${pct(acum)}</b> (${validos.length} ${validos.length === 1 ? "mês" : "meses"})`;
-    if (faltando.length) t += `<br>Ainda não divulgado: ${faltando.map(x => labelMes(x.mes)).join(", ")}.`;
-    msg(faltando.length ? "warn" : "ok", t);
-    let acc = 1;
-    $("mesesTbl").innerHTML = "<tr><td><b>Mês</b></td><td><b>IPCA</b> · <b>acumulado</b></td></tr>" + lista.map(x => {
-      if (x.v == null) return `<tr><td>${labelMes(x.mes)}</td><td>não divulgado</td></tr>`;
-      acc *= 1 + x.v/100; return `<tr><td>${labelMes(x.mes)}</td><td>${pct(x.v)} · ${pct((acc-1)*100, 4)}</td></tr>`;
-    }).join("");
-    $("mesesBox").classList.remove("hidden");
+    let aviso = "";
+    // Reajuste só vale quando o IPCA do mês anterior a ele já foi divulgado
+    while (true){
+      const fim = addMonths(ult, -1);
+      if (fim < db){ ipcaFator = 1; break; }
+      const lista = await obterIPCA(db, fim);
+      if (seq !== ipcaSeq) return;
+      if (lista[lista.length-1].v == null){
+        aviso = `O reajuste de ${labelMes(ult)} será aplicado após a divulgação do IPCA de ${labelMes(fim)}.`;
+        const ant = addMonths(ult, -12);
+        if (ant < ent){ ipcaFator = 1; ult = null; break; }
+        ult = ant; continue;
+      }
+      let f = 1; lista.forEach(x => f *= 1 + x.v/100);
+      const deflacao = f < 1;
+      if (deflacao) f = 1; // nunca aplica deflação
+      ipcaFator = f;
+      ipcaInfo = `IPCA ${labelMes(db)} a ${labelMes(fim)}: ${pct((f-1)*100)}`;
+      let t = deflacao ? `<b>IPCA acumulado negativo:</b> preço mantido, sem deflação.` : `<b>IPCA acumulado: ${pct((f-1)*100)}</b> (${labelMes(db)} a ${labelMes(fim)}, ${lista.length} ${lista.length === 1 ? "mês" : "meses"})`;
+      if (aviso) t += `<br>${aviso}`;
+      msg("ok", t);
+      let acc = 1;
+      $("mesesTbl").innerHTML = "<tr><td><b>Mês</b></td><td><b>IPCA</b> · <b>acumulado</b></td></tr>" + lista.map(x => {
+        acc *= 1 + x.v/100; return `<tr><td>${labelMes(x.mes)}</td><td>${pct(x.v)} · ${pct((acc-1)*100, 4)}</td></tr>`;
+      }).join("");
+      $("mesesBox").classList.remove("hidden");
+      break;
+    }
+    if (ult){
+      $("roReaj").textContent = `${labelMes(ult)} (${nReaj(ent, ult)}º)`;
+      $("roProx").textContent = labelMes(addMonths(ult, 12));
+    } else {
+      $("roProx").textContent = labelMes(ent);
+    }
+    if (ipcaFator === 1 && !ipcaInfo){ ipcaInfo = "Sem correção pelo IPCA"; msg(aviso ? "warn" : "ok", aviso || "Sem correção pelo IPCA neste período."); }
   }catch(e){
     if (seq !== ipcaSeq) return;
     ipcaFator = null;
@@ -348,31 +355,38 @@ function calcular(){
   if (!ok){
     ["t1","t2","t3","t4","t5","t6","t7","t8"].forEach(id => $(id).textContent = "—");
     $("rPrecoFinal").textContent = "—";
-    $("rTotalLinha").textContent = isNaN(P0) ? "Informe o preço e a data-base para calcular." : "Aguardando o IPCA e as alíquotas…";
+    $("rTotalLinha").textContent = isNaN(P0) ? "Informe o preço, a data-base e o início do suprimento." : "Aguardando o IPCA e as alíquotas…";
     $("rTotais").classList.add("hidden");
     return;
   }
-  const c = CONFIG.casasPreco;
-  const Pr = P0 * ipcaFator;
-  const P1 = Pr / (1 - pis - cof);
-  const Pf = P1 / (1 - icms);
-  $("t1").textContent = brl(P0, c);
-  $("tIpcaLbl").textContent = ipcaInfo || "Correção IPCA";
-  $("t2").textContent = (Pr - P0 >= 0 ? "+ " : "− ") + brl(Math.abs(Pr - P0), c);
-  $("t3").textContent = brl(Pr, c);
-  $("t4").textContent = "+ " + brl(P1 * pis, c);
-  $("t5").textContent = "+ " + brl(P1 * cof, c);
-  $("t6").textContent = brl(P1, c);
-  $("t7").textContent = "+ " + brl(Pf * icms, c);
-  $("t8").textContent = brl(Pf, c);
-  $("rPrecoFinal").textContent = brl(Pf, c) + "/MWh";
+  const r2 = x => Math.round((x + Number.EPSILON) * 100) / 100;
+  const r6 = x => Math.round(x * 1e6) / 1e6;
+  // Mesma sequência e arredondamento da memória de cálculo
+  const A = r2(P0 / (1 - pis - cof));   // preço + PIS/Cofins
+  const F = r6(ipcaFator);              // fator IPCA (6 casas)
+  const B = r2(A * F);                  // + IPCA
+  const C = r2(B / (1 - icms));         // + ICMS = preço vigente
+  const pisV = r2(A * pis), cofV = r2(A - P0 - pisV);
+  $("t1").textContent = brl(P0);
+  $("t2").textContent = "+ " + brl(pisV);
+  $("t3").textContent = "+ " + brl(cofV);
+  $("t4").textContent = brl(A);
+  $("tIpcaLbl").textContent = (ipcaInfo || "Correção IPCA") + (F !== 1 ? ` · fator ${num(F, 6)}` : "");
+  $("t5").textContent = "+ " + brl(B - A);
+  $("t6").textContent = brl(B);
+  $("t7").textContent = "+ " + brl(C - B);
+  $("t8").textContent = brl(C);
+  $("rPrecoFinal").textContent = brl(C) + "/MWh";
   if (!isNaN(vol) && vol > 0){
-    $("rTotalLinha").innerHTML = `Total da fatura: <b>${brl(Pf*vol)}</b>`;
+    const total = r2(C * vol);
+    const icmsT = r2(total * icms);
+    const pcT = r2((total - icmsT) * (pis + cof));
+    $("rTotalLinha").innerHTML = `Total da fatura: <b>${brl(total)}</b>`;
     $("v0").textContent = num(vol, 3) + " MWh";
-    $("v1").textContent = brl(Pr*vol);
-    $("v2").textContent = brl((P1-Pr)*vol);
-    $("v3").textContent = brl((Pf-P1)*vol);
-    $("v4").textContent = brl(Pf*vol);
+    $("v1").textContent = brl(total - icmsT - pcT);
+    $("v2").textContent = brl(pcT);
+    $("v3").textContent = brl(icmsT);
+    $("v4").textContent = brl(total);
     $("rTotais").classList.remove("hidden");
   } else {
     $("rTotalLinha").textContent = "Informe o volume para ver o total da fatura.";
@@ -381,7 +395,7 @@ function calcular(){
 }
 
 /* ---------- Link compartilhável ---------- */
-const CAMPOS = ["preco","volume","dataBase","entrada","mesFat","ipcaIni","ipcaFim","pis","cofins","icms"];
+const CAMPOS = ["preco","volume","dataBase","entrada","mesFat","icms"];
 function salvarURL(){
   const p = new URLSearchParams();
   CAMPOS.forEach(k => { const v = $(k).value; if (v) p.set(k, v); });
@@ -390,8 +404,6 @@ function salvarURL(){
 function lerURL(){
   const p = new URLSearchParams(location.hash.slice(1));
   CAMPOS.forEach(k => { if (p.has(k)) $(k).value = p.get(k); });
-  if (p.has("ipcaIni")) ipcaAuto.ini = false;
-  if (p.has("ipcaFim")) ipcaAuto.fim = false;
 }
 
 /* ---------- Inicialização ---------- */
@@ -402,12 +414,9 @@ function init(){
   $("icms").value = num(CONFIG.icmsPadrao);
   $("mesFat").value = hojeYM();
   lerURL();
-  sugerirPeriodo();
 
-  ["preco","volume","pis","cofins","icms"].forEach(id => $(id).addEventListener("input", calcular));
-  ["dataBase","entrada","mesFat"].forEach(id => $(id).addEventListener("change", () => { sugerirPeriodo(); atualizarIPCA(); }));
-  $("ipcaIni").addEventListener("change", () => { ipcaAuto.ini = false; atualizarIPCA(); });
-  $("ipcaFim").addEventListener("change", () => { ipcaAuto.fim = false; atualizarIPCA(); });
+  ["preco","volume","icms"].forEach(id => $(id).addEventListener("input", calcular));
+  ["dataBase","entrada","mesFat"].forEach(id => $(id).addEventListener("change", atualizarIPCA));
 
   $("btnLink").addEventListener("click", async () => {
     salvarURL();
