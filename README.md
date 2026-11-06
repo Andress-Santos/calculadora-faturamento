@@ -5,12 +5,13 @@ Calculadora online para o cliente conferir o valor faturado: parte do **preço c
 ## Como o cálculo é feito
 
 1. **Preço reajustado** = Preço contratado × Fator IPCA
-   (Fator IPCA = produto de (1 + IPCA mensal) no período)
+   (Fator IPCA = produto de (1 + IPCA mensal), do mês seguinte à data-base até o mês anterior ao último reajuste)
+   - O 1º reajuste ocorre no mês de início do suprimento; os seguintes, a cada 12 meses (aniversário da entrada).
 2. **Preço c/ PIS/Cofins** = Preço reajustado ÷ (1 − PIS − Cofins)
 3. **Preço final** = Preço c/ PIS/Cofins ÷ (1 − ICMS)
 4. **Total da fatura** = Preço final × Volume (MWh)
 
-O IPCA vem automaticamente da API do Banco Central (série SGS 433). Se ela não responder, a calculadora usa a do IBGE (SIDRA, tabela 1737). O cliente também pode digitar o IPCA à mão.
+O IPCA vem automaticamente da API do Banco Central (série SGS 433). Se ela não responder, a calculadora usa a do IBGE (SIDRA, tabela 1737). Se o IPCA acumulado for negativo, o preço é mantido (nunca há deflação).
 
 ## Publicar no GitHub Pages (link público, sem login)
 
@@ -23,7 +24,7 @@ O IPCA vem automaticamente da API do Banco Central (série SGS 433). Se ela não
 
 Qualquer pessoa com o link consegue usar, sem login.
 
-**Domínio próprio (opcional):** em Settings → Pages → *Custom domain*, informe por exemplo `calculadora.bepenergia.com.br` e crie um registro CNAME no DNS apontando para `SEU-USUARIO.github.io`.
+**Domínio próprio (opcional):** em Settings → Pages → *Custom domain*, informe por exemplo `calculadora.suaempresa.com.br` e crie um registro CNAME no DNS apontando para `SEU-USUARIO.github.io`.
 
 ## Personalizar
 
@@ -31,9 +32,6 @@ No `index.html`, procure o bloco `CONFIG` (no início do `<script>`):
 
 ```js
 const CONFIG = {
-  empresa: "BEP Energia",
-  sigla: "BEP",
-  contato: "comercial@bepenergia.com.br",
   pisPadrao: 1.65,
   cofinsPadrao: 7.60,
   icmsPadrao: 18.00,
