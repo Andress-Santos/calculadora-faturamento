@@ -106,7 +106,7 @@
             <input id="dataBase" type="month">
           </div>
           <div>
-            <label for="entrada">Início do suprimento</label>
+            <label for="entrada">1º reajuste</label>
             <input id="entrada" type="month">
           </div>
         </div>
@@ -148,7 +148,7 @@
         <h2><span class="step">4</span>Simulação da nota fiscal</h2>
         <div class="row">
           <div>
-            <label for="mesFat">Mês de faturamento</label>
+            <label for="mesFat">Mês de referência</label>
             <input id="mesFat" type="month">
           </div>
           <div>
@@ -190,8 +190,7 @@
           <div class="formula" id="formula">1) Preço + PIS/Cofins = Preço do contrato ÷ (1 − PIS − Cofins)
 
 2) Fator IPCA = (1 + IPCA mês 1) × (1 + IPCA mês 2) × …
-   da data-base até o mês de aniversário do suprimento;
-   o novo preço vale a partir do mês seguinte
+   da data-base até o mês do reajuste vigente (inclusive)
 
 3) Preço + PIS/Cofins + IPCA = (1) × Fator IPCA
 
@@ -281,12 +280,12 @@ let ipcaFator = null, ipcaInfo = "", ipcaSeq = 0;
 function msg(tipo, texto){ const el = $("ipcaMsg"); el.className = "msg " + tipo; el.innerHTML = texto; el.classList.toggle("hidden", !texto); }
 const nReaj = (ent, r) => Math.round((ym(r).y*12 + ym(r).m - ym(ent).y*12 - ym(ent).m)/12) + 1;
 
-// Aniversário do suprimento: entrada + 12k meses. O IPCA vai até o aniversário (inclusive)
-// e o novo preço vale a partir do mês seguinte. Retorna o maior aniversário com (aniv + 1) <= faturamento.
-function ultimoAniversario(entrada, mf){
-  if (!entrada || !mf || addMonths(entrada, 1) > mf) return null;
-  let a = entrada;
-  while (addMonths(a, 13) <= mf) a = addMonths(a, 12);
+// Reajustes: 1º reajuste + 12k meses. Retorna o maior reajuste <= mês de referência.
+// O IPCA vai da data-base até o mês do reajuste (inclusive).
+function ultimoAniversario(primeiro, mf){
+  if (!primeiro || !mf || mf < primeiro) return null;
+  let a = primeiro;
+  while (addMonths(a, 12) <= mf) a = addMonths(a, 12);
   return a;
 }
 
@@ -298,14 +297,13 @@ async function atualizarIPCA(){
   $("roReaj").textContent = "—"; $("roProx").textContent = "—";
   ipcaFator = null; ipcaInfo = "";
   if (!db || !ent || !mf){ msg("", ""); calcular(); return; }
-  if (mf < ent){ msg("warn", "O mês de faturamento é anterior ao início do suprimento."); calcular(); return; }
   let aniv = ultimoAniversario(ent, mf);
-  let ult = aniv ? addMonths(aniv, 1) : null; // mês em que o reajuste passa a valer
-  if (!ult){ ipcaFator = 1; ipcaInfo = "Sem correção pelo IPCA"; $("roProx").textContent = labelMes(addMonths(ent, 1)); msg("ok", `Primeiro reajuste em ${labelMes(addMonths(ent, 1))}.`); calcular(); return; }
+  let ult = aniv;
+  if (!ult){ ipcaFator = 1; ipcaInfo = "Sem correção pelo IPCA"; $("roProx").textContent = labelMes(ent); msg("ok", `1º reajuste em ${labelMes(ent)}.`); calcular(); return; }
   msg("ok", "Buscando IPCA…");
   try{
     let aviso = "";
-    // Reajuste só vale quando o IPCA do mês anterior a ele já foi divulgado
+    // Reajuste só vale quando o IPCA do próprio mês do reajuste já foi divulgado
     while (true){
       const fim = aniv;
       if (fim < db){ ipcaFator = 1; break; }
@@ -315,7 +313,7 @@ async function atualizarIPCA(){
         aviso = `O reajuste de ${labelMes(ult)} será aplicado após a divulgação do IPCA de ${labelMes(fim)}.`;
         const ant = addMonths(aniv, -12);
         if (ant < ent){ ipcaFator = 1; ult = null; break; }
-        aniv = ant; ult = addMonths(aniv, 1); continue;
+        aniv = ant; ult = aniv; continue;
       }
       let f = 1; lista.forEach(x => f *= 1 + x.v/100);
       const deflacao = f < 1;
@@ -336,7 +334,7 @@ async function atualizarIPCA(){
       $("roReaj").textContent = `${labelMes(ult)} (${nReaj(ent, aniv)}º)`;
       $("roProx").textContent = labelMes(addMonths(ult, 12));
     } else {
-      $("roProx").textContent = labelMes(addMonths(ent, 1));
+      $("roProx").textContent = labelMes(ent);
     }
     if (ipcaFator === 1 && !ipcaInfo){ ipcaInfo = "Sem correção pelo IPCA"; msg(aviso ? "warn" : "ok", aviso || "Sem correção pelo IPCA neste período."); }
   }catch(e){
@@ -359,7 +357,7 @@ function calcular(){
   if (!ok){
     ["t1","t2","t3","t4","t5","t6","t7","t8"].forEach(id => $(id).textContent = "—");
     $("rPrecoFinal").textContent = "—";
-    $("rTotalLinha").textContent = isNaN(P0) ? "Informe o preço, a data-base e o início do suprimento." : "Aguardando o IPCA e as alíquotas…";
+    $("rTotalLinha").textContent = isNaN(P0) ? "Informe o preço, a data-base e o 1º reajuste." : "Aguardando o IPCA e as alíquotas…";
     $("rTotais").classList.add("hidden");
     return;
   }
